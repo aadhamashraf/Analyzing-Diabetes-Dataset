@@ -9,6 +9,8 @@ library(broom) # for tidy statistical summaries
 library(stringr) # for string manipulation
 
 
+
+## Functions for Part 3
 create_summary_stats <- function(data, group_col, value_col) {
   data %>%
     group_by(!!sym(group_col)) %>%
@@ -19,9 +21,13 @@ create_summary_stats <- function(data, group_col, value_col) {
       se = sd / sqrt(n)
     )
 }
+print_results <- function(t_test_result, bp_t_test) {
+  cat("\n=== BMI and Glucose Level Analysis ===\n")
+  print(t_test_result)
 
-# Visualization functions
-
+  cat("\n=== Blood Pressure and Diabetes Status Analysis ===\n")
+  print(bp_t_test)
+}
 create_boxplot <- function(data, group_col, value_col, title) {
   ggplot(data, aes(x = .data[[group_col]], y = .data[[value_col]])) +
     geom_boxplot(fill = "lightblue", alpha = 0.7) +
@@ -33,7 +39,6 @@ create_boxplot <- function(data, group_col, value_col, title) {
       y = stringr::str_to_title(stringr::str_replace_all(value_col, "_", " "))
     )
 }
-
 create_qq_plot <- function(data, value_col, group_col) {
   ggplot(data, aes(sample = .data[[value_col]])) +
     geom_qq() +
@@ -42,7 +47,6 @@ create_qq_plot <- function(data, value_col, group_col) {
     theme_minimal() +
     labs(title = "Normal Q-Q Plot by Group")
 }
-
 interpret_hypothesis_test <- function(test_result, alpha = 0.05) {
   conclusion <- if (test_result$p.value < alpha) {
     "Reject the null hypothesis"
@@ -56,4 +60,23 @@ interpret_hypothesis_test <- function(test_result, alpha = 0.05) {
     confidence_interval = test_result$conf.int,
     conclusion = conclusion
   )
+}
+create_report <- function(
+  bmi_glucose_interpretation, bp_diabetes_interpretation
+) {
+  cat("\n=== Hypothesis Testing Results ===\n\n")
+
+  cat("1. BMI and Glucose Levels:\n")
+  cat("   - ", bmi_glucose_interpretation$conclusion, "\n")
+  cat("   - P-value:", format.pval(bmi_glucose_interpretation$p_value), "\n")
+  cat("   - 95% CI:", paste(
+    round(bmi_glucose_interpretation$confidence_interval, 2), collapse = " to "
+  ), "\n\n")
+
+  cat("2. Blood Pressure and Diabetes Status:\n")
+  cat("   - ", bp_diabetes_interpretation$conclusion, "\n")
+  cat("   - P-value:", format.pval(bp_diabetes_interpretation$p_value), "\n")
+  cat("   - 95% CI:", paste(
+    round(bp_diabetes_interpretation$confidence_interval, 2), collapse = " to "
+  ), "\n")
 }
