@@ -62,15 +62,15 @@ interpret_hypothesis_test <- function(test_result, alpha = 0.05) {
   )
 }
 create_report <- function(
-  bmi_glucose_interpretation, bp_diabetes_interpretation
+  diabetes_glucose_interpretation, bp_diabetes_interpretation
 ) {
   cat("\n=== Hypothesis Testing Results ===\n\n")
 
   cat("1. BMI and Glucose Levels:\n")
-  cat("   - ", bmi_glucose_interpretation$conclusion, "\n")
-  cat("   - P-value:", format.pval(bmi_glucose_interpretation$p_value), "\n")
+  cat("   - ", diabetes_glucose_interpretation$conclusion, "\n")
+  cat("   - P-value:", format.pval(diabetes_glucose_interpretation$p_value), "\n")
   cat("   - 95% CI:", paste(
-    round(bmi_glucose_interpretation$confidence_interval, 2), collapse = " to "
+    round(diabetes_glucose_interpretation$confidence_interval, 2), collapse = " to "
   ), "\n\n")
 
   cat("2. Blood Pressure and Diabetes Status:\n")
