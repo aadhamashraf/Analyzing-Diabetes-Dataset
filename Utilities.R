@@ -135,5 +135,16 @@ calculate_CIs_proportion <- function(CIs, value)
     }
     cat("Confidence Interval ", i, " -> Lower bound: ", CIs[[i]]$LOW, ", Upper bound: ", CIs[[i]]$HIGH, ", Contain the value: ", contained_flag, "\n")
   }
+  cat("Number of confidence intervals that contain the true population mean: ", c, "\n")
   return (c / len)
+}
+
+# This function takes a list of Confidence intervals, and returns the width of each one.
+calculate_CI_widths <- function(CIs) {
+  len = length(CIs)
+  widths <- numeric(len)
+  for (i in 1:len) {
+    widths[i] <- CIs[[i]]$HIGH - CIs[[i]]$LOW
+  }
+  return(widths)
 }
