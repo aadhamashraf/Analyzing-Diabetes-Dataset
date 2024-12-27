@@ -7,10 +7,28 @@ library(readr) # for data import
 library(tidyr) # for data tidying
 library(broom) # for tidy statistical summaries
 library(stringr) # for string manipulation
+library(rlang)
 
+handle_outliers <- function(data, column_name) {
+  ggplot(data, aes(x = "", y = !!sym(column_name))) +
+    geom_boxplot() +
+    labs(title = paste("Boxplot of", column_name), y = column_name)
+  
+  Q1 <- quantile(data[[column_name]], 0.25, na.rm = TRUE)
+  Q3 <- quantile(data[[column_name]], 0.75, na.rm = TRUE)
+  IQR <- Q3 - Q1
+  lower_bound <- Q1 - 1.5 * IQR
+  upper_bound <- Q3 + 1.5 * IQR
+  
+  outliers <- data[[column_name]][data[[column_name]] < lower_bound | data[[column_name]] > upper_bound]
+  print(paste("Outliers in", column_name, ":", paste(outliers, collapse = ", ")))
+  
+  data[[column_name]][data[[column_name]] < lower_bound] <- lower_bound
+  data[[column_name]][data[[column_name]] > upper_bound] <- upper_bound
+  
+  return(data)
+}
 
-
-## Functions for Part 3
 create_summary_stats <- function(data, group_col, value_col) {
   data %>%
     group_by(!!sym(group_col)) %>%
@@ -21,6 +39,7 @@ create_summary_stats <- function(data, group_col, value_col) {
       se = sd / sqrt(n)
     )
 }
+
 print_results <- function(t_test_result, bp_t_test) {
   cat("\n=== BMI and Glucose Level Analysis ===\n")
   print(t_test_result)
@@ -28,6 +47,7 @@ print_results <- function(t_test_result, bp_t_test) {
   cat("\n=== Blood Pressure and Diabetes Status Analysis ===\n")
   print(bp_t_test)
 }
+
 create_boxplot <- function(data, group_col, value_col, title) {
   ggplot(data, aes(x = .data[[group_col]], y = .data[[value_col]])) +
     geom_boxplot(fill = "lightblue", alpha = 0.7) +
@@ -39,6 +59,7 @@ create_boxplot <- function(data, group_col, value_col, title) {
       y = stringr::str_to_title(stringr::str_replace_all(value_col, "_", " "))
     )
 }
+  
 create_qq_plot <- function(data, value_col, group_col) {
   ggplot(data, aes(sample = .data[[value_col]])) +
     geom_qq() +
@@ -47,6 +68,7 @@ create_qq_plot <- function(data, value_col, group_col) {
     theme_minimal() +
     labs(title = "Normal Q-Q Plot by Group")
 }
+
 interpret_hypothesis_test <- function(test_result, alpha = 0.05) {
   conclusion <- if (test_result$p.value < alpha) {
     "Reject the null hypothesis"
