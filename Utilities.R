@@ -80,3 +80,60 @@ create_report <- function(
     round(bp_diabetes_interpretation$confidence_interval, 2), collapse = " to "
   ), "\n")
 }
+
+# This function takes number of samples, size of each one and data to be sampled from and return a list of these samples
+generate_random_samples <- function(num_of_samples, sample_size, data)
+{
+  samples_list <- list()
+  for (i in 1:num_of_samples)
+  {
+    samples_list[[i]] <- sample(data, sample_size)
+  }
+  return (samples_list)
+}
+
+# This function take samples list and return a list with the means and standard deviation of each sample
+calculate_stats <- function(samples_list)
+{
+  samples_stats <- list()
+  for (i in 1:length(samples_list))
+  {
+    samples_stats[[i]] <- list(MEAN = mean(samples_list[[i]]), STD = sd(samples_list[[i]]))
+  }
+  return (samples_stats)
+}
+
+# This function take list of samples statistics, number of samples, and confidence percentage, and return confidence interval for these statistics
+calculate_confidence_intervals <- function(samples_stats, n, confidence_percentage)
+{
+  CIs <- list()
+  alpha <- (100 - confidence_percentage) / 100 / 2
+  quartile <- confidence_percentage / 100 + alpha
+  t_critical <- qt(quartile, df <- n - 1)
+  for (i in 1:length(samples_stats))
+  {
+    x_bar <- samples_stats[[i]]$MEAN
+    standard_deviation <- samples_stats[[i]]$STD
+    margin <- t_critical * standard_deviation / sqrt(n)
+    CIs[[i]] <- list(LOW = x_bar - margin, HIGH = x_bar + margin)
+  }
+  return (CIs)
+}
+
+# This function take list of confidence intervals and value, and return the proportion of these confidence intervals that contain these values
+calculate_CIs_proportion <- function(CIs, value)
+{
+  cat("The given value is ", value, "\n")
+  c = 0
+  len = length(CIs)
+  for (i in 1:len)
+  {
+    contained_flag <- (value >= CIs[[i]]$LOW && value <= CIs[[i]]$HIGH)
+    if (contained_flag)
+    {
+      c <- c + 1
+    }
+    cat("Confidence Interval ", i, " -> Lower bound: ", CIs[[i]]$LOW, ", Upper bound: ", CIs[[i]]$HIGH, ", Contain the value: ", contained_flag, "\n")
+  }
+  return (c / len)
+}
