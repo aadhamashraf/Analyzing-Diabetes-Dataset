@@ -8,6 +8,7 @@ library(broom) # for tidy statistical summaries
 library(stringr) # for string manipulation
 library(rlang)
 
+# Handle down Outliers: Identifies, visualizes, and adjusts outliers in the specified column.
 handle_outliers <- function(data, column_name) {
   ggplot(data, aes(x = "", y = !!sym(column_name))) +
     geom_boxplot() +
@@ -28,6 +29,7 @@ handle_outliers <- function(data, column_name) {
   return(data)
 }
 
+# Create Summary Stats: Computes group-wise summary statistics for the given data.
 create_summary_stats <- function(data, group_col, value_col) {
   data %>%
     group_by(!!sym(group_col)) %>%
@@ -39,14 +41,16 @@ create_summary_stats <- function(data, group_col, value_col) {
     )
 }
 
+# Print Results: Displays the results of hypothesis tests with descriptive titles.
 print_results <- function(t_test_result, bp_t_test) {
-  cat("\n=== diabetes and Glucose Level Analysis ===\n")
+  cat("\n=== Diabetes and Glucose Level Analysis ===\n")
   print(t_test_result)
 
   cat("\n=== Blood Pressure and Diabetes Status Analysis ===\n")
   print(bp_t_test)
 }
 
+# Create Boxplot: Visualizes the distribution of data across groups using a boxplot.
 create_boxplot <- function(data, group_col, value_col, title) {
   ggplot(data, aes(x = .data[[group_col]], y = .data[[value_col]])) +
     geom_boxplot(fill = "lightblue", alpha = 0.7) +
@@ -58,7 +62,8 @@ create_boxplot <- function(data, group_col, value_col, title) {
       y = str_to_title(str_replace_all(value_col, "_", " "))
     )
 }
-  
+
+# Create QQ Plot: Generates a Q-Q plot to assess normality by group.
 create_qq_plot <- function(data, value_col, group_col) {
   ggplot(data, aes(sample = .data[[value_col]])) +
     geom_qq() +
@@ -68,6 +73,7 @@ create_qq_plot <- function(data, value_col, group_col) {
     labs(title = "Normal Q-Q Plot by Group")
 }
 
+# Interpret Hypothesis Test: Summarizes and interprets the results of a hypothesis test.
 interpret_hypothesis_test <- function(test_result, alpha = 0.05) {
   conclusion <- if (test_result$p.value < alpha) {
     "Reject the null hypothesis"
@@ -83,10 +89,11 @@ interpret_hypothesis_test <- function(test_result, alpha = 0.05) {
   )
 }
 
+# Create Report: Generates a textual report summarizing hypothesis test interpretations.
 create_report <- function(diabetes_glucose_interpretation, bp_diabetes_interpretation) {
   cat("\n=== Hypothesis Testing Results ===\n\n")
 
-  cat("1. diabetic and Glucose Levels:\n")
+  cat("1. Diabetic and Glucose Levels:\n")
   cat("   - ", diabetes_glucose_interpretation$conclusion, "\n")
   cat("   - P-value:", format.pval(diabetes_glucose_interpretation$p_value), "\n")
   cat("   - 95% CI:", paste(
@@ -101,6 +108,7 @@ create_report <- function(diabetes_glucose_interpretation, bp_diabetes_interpret
   ), "\n")
 }
 
+# Generate Random Samples: Creates a list of random samples from the data.
 generate_random_samples <- function(num_of_samples, sample_size, data) {
   samples_list <- vector("list", num_of_samples)
   for (i in seq_len(num_of_samples)) {
@@ -109,12 +117,14 @@ generate_random_samples <- function(num_of_samples, sample_size, data) {
   return(samples_list)
 }
 
+# Calculate Stats: Computes the mean and standard deviation for each sample.
 calculate_stats <- function(samples_list) {
   lapply(samples_list, function(sample) {
     list(MEAN = mean(sample), STD = sd(sample))
   })
 }
 
+# Calculate Confidence Intervals: Computes confidence intervals for sample statistics.
 calculate_confidence_intervals <- function(samples_stats, n, confidence_percentage) {
   alpha <- (100 - confidence_percentage) / 100 / 2
   quartile <- confidence_percentage / 100 + alpha
@@ -127,6 +137,7 @@ calculate_confidence_intervals <- function(samples_stats, n, confidence_percenta
   })
 }
 
+# Calculate CIs Proportion: Determines the proportion of confidence intervals containing a value.
 calculate_CIs_proportion <- function(CIs, value) {
   cat("The given value is ", value, "\n")
   contained_count <- sum(sapply(CIs, function(CI) {
@@ -138,6 +149,7 @@ calculate_CIs_proportion <- function(CIs, value) {
   return(contained_count / length(CIs))
 }
 
+# Calculate CI Widths: Computes the widths of confidence intervals.
 calculate_CI_widths <- function(CIs) {
   sapply(CIs, function(CI) CI$HIGH - CI$LOW)
 }
