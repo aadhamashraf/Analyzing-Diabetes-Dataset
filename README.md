@@ -81,4 +81,4 @@ Visualizations and detailed commentary are included in the notebook.
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/YourUsername/Analyzing-Diabetes-Dataset.git
+   https://github.com/aadhamashraf/Analyzing-Diabetes-Dataset.git
